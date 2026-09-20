@@ -932,3 +932,22 @@ html, body {
   will-change: clip-path;
   transform: translateZ(0);
 }
+
+/* 1. Evita que el contenedor capture el scroll vertical en móviles */
+.comparison {
+  touch-action: pan-y; /* Permite deslizar la página normalmente con el dedo */
+}
+
+/* 2. Desactiva el repintado de pantalla completa en pantallas táctiles */
+@media (max-width: 768px) {
+  html, body {
+    background-attachment: scroll !important; /* Vuelve el scroll ligero y nativo */
+  }
+
+  /* Reduce la carga pesada de GPU de los desenfoques múltiples */
+  .card-horizontal,
+  .ig-card {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
