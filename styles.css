@@ -902,52 +902,37 @@ html, body {
   }
 }
 
-/* 1. Desactivar el background-attachment fixed en móviles */
-@media (max-width: 768px) {
-  html, body {
-    background-attachment: scroll !important; /* Libera el scroll por GPU */
-  }
+/* ======================================================
+   OPTIMIZACIÓN DE RENDIMIENTO Y MÓVIL (FINAL DEL CSS)
+====================================================== */
 
-  /* 2. Reducir o eliminar blurs pesados en tarjetas móviles */
-  .card-horizontal,
-  .ig-card,
-  .slider-handle {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: rgba(255, 255, 255, 0.98);
-  }
-
-  .hero-ambient-glow {
-    display: none; /* Elimina un filtro blur de 28px invisible en pantallas chicas */
-  }
-}
-
-/* 3. Aceleración por hardware para el comparador */
+/* 1. Aceleración por hardware y scroll vertical sin bloqueos */
 .comparison {
+  touch-action: pan-y;
   transform: translateZ(0);
   will-change: --split;
 }
 
 .after-clip {
-  will-change: clip-path;
   transform: translateZ(0);
+  will-change: clip-path;
 }
 
-/* 1. Evita que el contenedor capture el scroll vertical en móviles */
-.comparison {
-  touch-action: pan-y; /* Permite deslizar la página normalmente con el dedo */
-}
-
-/* 2. Desactiva el repintado de pantalla completa en pantallas táctiles */
+/* 2. Reglas exclusivas para pantallas móviles / táctiles */
 @media (max-width: 768px) {
   html, body {
-    background-attachment: scroll !important; /* Vuelve el scroll ligero y nativo */
+    background-attachment: scroll !important; /* Elimina el repintado forzado en cada frame */
   }
 
-  /* Reduce la carga pesada de GPU de los desenfoques múltiples */
   .card-horizontal,
-  .ig-card {
-    backdrop-filter: none !important;
+  .ig-card,
+  .slider-handle {
+    backdrop-filter: none !important; /* Quita el cálculo de blur en tiempo real */
     -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .hero-ambient-glow {
+    display: none; /* Elimina el filtro blur de 28px que ahoga la GPU móvil */
   }
 }
