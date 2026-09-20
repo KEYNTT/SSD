@@ -1,26 +1,20 @@
 /**
- * NRIAL PLATFORM — Controlador de Portada
- * Inyecta un máximo estricto de 6 cartillas en la portada.
- * Si existen más piezas, muestra el botón hacia galeria.html.
+ * NRIAL PLATFORM — Controlador Unificado (Portada y Catálogo)
+ * Maneja imágenes y videos en relación 3:4 con CLS = 0.
  */
 
 const API_POSTS_URL = "https://nrial-media-api.kevin-123-abanto.workers.dev/api/posts";
 const HOMEPAGE_LIMIT = 6;
 
-// Elementos del DOM
-const cardsGrid = document.getElementById("cards-grid");
-const loadMoreBtn = document.getElementById("load-more-btn");
-const template = document.getElementById("card-template");
-
 /**
- * Valida si la URL contiene una extensión de video
+ * Validador de formato de video
  */
 function isVideoUrl(url) {
   return /\.(webm|mp4|mov|ogg)(\?.*)?$/i.test(url);
 }
 
 /**
- * Precarga perezosa (Lazy Preload)
+ * Precarga de videos al aproximarse a la pantalla (300px de margen)
  */
 const preloadObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach(({ target: video, isIntersecting }) => {
@@ -30,64 +24,28 @@ const preloadObserver = new IntersectionObserver((entries, observer) => {
       observer.unobserve(video);
     }
   });
-}, { rootMargin: "250px 0px" });
+}, { rootMargin: "300px 0px" });
 
 /**
- * Reproducción automática al estar en pantalla
+ * Reproducción silenciosa automática cuando el video está visible
  */
 const playbackObserver = new IntersectionObserver((entries) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting) {
+      video.muted = true;
+      video.defaultMuted = true;
       video.play().catch(() => {});
     } else {
       video.pause();
     }
   });
-}, { threshold: 0.5 });
+}, { threshold: 0.35 });
 
 /**
- * Construye cada cartilla utilizando la plantilla original exacta
- */
-function createCardElement(media) {
-  const clone = template.content.cloneNode(true);
-  const card = clone.querySelector(".ig-card");
-
-  // 1. Asignar imagen "Antes"
-  const beforeImg = clone.querySelector(".before-media");
-  beforeImg.src = media.before;
-
-  // 2. Asignar capa "Después" (Video o Imagen)
-  const afterClip = clone.querySelector(".after-clip");
-  const videoEl = clone.querySelector(".after-video");
-
-  if (isVideoUrl(media.after)) {
-    videoEl.dataset.src = media.after;
-    preloadObserver.observe(videoEl);
-    playbackObserver.observe(videoEl);
-  } else {
-    videoEl.remove();
-    const imgEl = document.createElement("img");
-    imgEl.className = "after-media";
-    imgEl.src = media.after;
-    imgEl.alt = "Después";
-    imgEl.loading = "lazy";
-    imgEl.draggable = false;
-    imgEl.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none;";
-    afterClip.appendChild(imgEl);
-  }
-
-  // 3. Inicializar comparador táctil / cursor
-  setupComparator(card.querySelector("[data-comparison]"));
-
-  return card;
-}
-
-/**
- * Lógica del comparador interactivo
+ * Controlador táctil y puntero del deslizador Antes/Después
  */
 function setupComparator(container) {
   if (!container) return;
-
   let resetTimer = null;
 
   const updateSplit = (pct) => {
@@ -112,6 +70,8 @@ function setupComparator(container) {
     resetTimer = setTimeout(() => container.classList.remove("is-resetting"), 450);
   };
 
+  // Eventos para soporte móvil (táctil) y escritorio
+  container.addEventListener("pointerdown", onMove);
   container.addEventListener("pointerenter", onMove);
   container.addEventListener("pointermove", onMove);
   ["pointerleave", "pointerup", "pointercancel"].forEach((evt) => {
@@ -122,34 +82,100 @@ function setupComparator(container) {
 }
 
 /**
- * Carga de datos desde Cloudflare R2
+ * Construcción individual de tarjeta desde la plantilla
+ */
+function createCard(media, template) {
+  const clone = template.content.cloneNode(true);
+  const card = clone.querySelector(".ig-card");
+
+  // Asignación de imagen "Antes"
+  const beforeImg = clone.querySelector(".before-media");
+  if (beforeImg) beforeImg.src = media.before;
+
+  // Asignación de capa "Después"
+  const afterClip = clone.querySelector(".after-clip");
+  const videoEl = clone.querySelector(".after-video");
+
+  if (isVideoUrl(media.after)) {
+    videoEl.muted = true;
+    videoEl.defaultMuted = true;
+    videoEl.playsInline = true;
+    videoEl.setAttribute("muted", "");
+    videoEl.setAttribute("playsinline", "");
+    videoEl.dataset.src = media.after;
+
+    preloadObserver.observe(videoEl);
+    playbackObserver.observe(videoEl);
+  } else {
+    // Si es imagen estática, remueve el video e inserta <img>
+    videoEl.remove();
+    const imgEl = document.createElement("img");
+    imgEl.className = "after-media";
+    imgEl.src = media.after;
+    imgEl.alt = "Después";
+    imgEl.loading = "lazy";
+    imgEl.draggable = false;
+    afterClip.appendChild(imgEl);
+  }
+
+  setupComparator(card.querySelector("[data-comparison]"));
+  return card;
+}
+
+/**
+ * Inicialización principal
  */
 document.addEventListener("DOMContentLoaded", async () => {
-  // Inicializar comparador 16:9 del Hero
-  setupComparator(document.querySelector(".comparator-16-9"));
+  // 1. Activa el reproductor 16:9 del Hero (si existe en la página)
+  const heroComparator = document.querySelector(".comparator-16-9");
+  if (heroComparator) setupComparator(heroComparator);
+
+  // 2. Detección automática del contenedor activo
+  const cardsGrid = document.getElementById("cards-grid") || document.getElementById("full-grid");
+  const template = document.getElementById("card-template");
+  const catalogCounter = document.getElementById("catalog-counter");
+  const loadMoreBtn = document.getElementById("load-more-btn");
+
+  if (!cardsGrid || !template) return;
 
   try {
     const res = await fetch(`${API_POSTS_URL}?t=${Date.now()}`);
-    if (res.ok) {
-      const posts = await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      if (Array.isArray(posts) && posts.length > 0) {
-        // Renderizamos estrictamente las primeras 6 publicaciones
-        const initialBatch = posts.slice(0, HOMEPAGE_LIMIT);
-        initialBatch.forEach(item => cardsGrid.appendChild(createCardElement(item)));
+    const posts = await res.json();
+    if (!Array.isArray(posts) || posts.length === 0) {
+      if (catalogCounter) catalogCounter.textContent = "No hay piezas registradas.";
+      return;
+    }
 
-        // Mostrar botón si hay más de 6 elementos
-        if (posts.length > HOMEPAGE_LIMIT && loadMoreBtn) {
-          loadMoreBtn.classList.remove("is-hidden");
-        } else if (loadMoreBtn) {
-          loadMoreBtn.classList.add("is-hidden");
-        }
-      } else if (loadMoreBtn) {
+    // Actualiza contador si estamos en galeria.html
+    if (catalogCounter) {
+      catalogCounter.textContent = `${posts.length} publicaciones disponibles en alta fidelidad`;
+    }
+
+    cardsGrid.innerHTML = "";
+
+    // Si el contenedor es "cards-grid", aplica el límite de 6 piezas (portada);
+    // si es "full-grid", carga todo el catálogo.
+    const isHomepage = cardsGrid.id === "cards-grid";
+    const itemsToRender = isHomepage ? posts.slice(0, HOMEPAGE_LIMIT) : posts;
+
+    itemsToRender.forEach((item) => {
+      cardsGrid.appendChild(createCard(item, template));
+    });
+
+    // Gestión del botón "Ver más..." en portada
+    if (loadMoreBtn) {
+      if (isHomepage && posts.length > HOMEPAGE_LIMIT) {
+        loadMoreBtn.classList.remove("is-hidden");
+      } else {
         loadMoreBtn.classList.add("is-hidden");
       }
     }
   } catch (err) {
-    console.warn("No se pudo obtener el catálogo desde el Worker:", err);
-    if (loadMoreBtn) loadMoreBtn.classList.add("is-hidden");
+    console.error("Error al sincronizar con el catálogo:", err);
+    if (catalogCounter) {
+      catalogCounter.textContent = "Error al conectar con el servidor.";
+    }
   }
 });

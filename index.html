@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NRIAL PLATFORM</title>
   
-  <!-- Tipografía Inter y acentos de diseño -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -26,12 +25,11 @@
   </header>
 
   <!-- =========================================
-       1. HERO HORIZONTAL 16:9 CON COLOR Y DETALLES
+       1. HERO HORIZONTAL 16:9
   ========================================== -->
   <section class="hero-wrapper">
     <div class="hero-grid">
       
-      <!-- Columna Izquierda: Copy Principal -->
       <div class="hero-left">
         <div class="hero-pill-badge">
           <span class="pill-dot"></span>
@@ -45,9 +43,7 @@
         </div>
       </div>
 
-      <!-- Columna Derecha: Tarjeta 16:9 enriquecida -->
       <div class="hero-right">
-        <!-- Resplandor dinámico de fondo (Halo cromático) -->
         <div class="hero-ambient-glow"></div>
 
         <div class="card-horizontal">
@@ -64,7 +60,7 @@
             </ul>
           </div>
 
-          <!-- Comparador 16:9 con badges de detalle -->
+          <!-- Comparador 16:9 -->
           <div class="comparator-outer">
             <div class="badge-cinema badge-top-left">4K • 60 FPS</div>
             <div class="badge-cinema badge-top-right">CINEMA GRADING</div>
@@ -114,16 +110,14 @@
   </section>
 
   <!-- =========================================
-       2. SECCIÓN GALERÍA (MÁXIMO 6 CARTILLAS COMPACTAS)
+       2. SECCIÓN GALERÍA (MÁXIMO 6 CARTILLAS)
   ========================================== -->
   <section class="gallery-section" id="galeria">
     <div class="gallery-container">
-      <!-- Cuadrícula donde JS inyecta exactamente 6 tarjetas -->
       <div class="cards-grid" id="cards-grid"></div>
 
-      <!-- Botón que redirige al HTML del catálogo completo -->
       <div class="load-more-wrap">
-        <a href="galeria.html" id="load-more-btn" class="btn-load-more">
+        <a href="galeria.html" id="load-more-btn" class="btn-load-more is-hidden">
           Ver más...
         </a>
       </div>
@@ -131,7 +125,7 @@
   </section>
 
   <!-- =========================================
-       3. BANNER PRE-FOOTER (CONVERSIÓN)
+       3. BANNER PRE-FOOTER
   ========================================== -->
   <section class="cta-banner" id="contacto">
     <div class="cta-inner">
@@ -144,64 +138,58 @@
   </section>
 
   <!-- =========================================
-        PIE DE PÁGINA TOTALMENTE EN NEGRO (#000000)
-    ========================================== -->
-    <footer class="footer-creative">
-      <div class="footer-container">
-        <div class="footer-top">
-          <!-- Manifiesto -->
-          <div class="footer-col brand-col">
-            <div class="footer-brand">NRIAL PLATFORM<span class="brand-dot">.</span></div>
-            <p class="footer-manifesto">
-              Ayudamos a fundadores, creadores y marcas que entienden que en la era del scroll infinito, pasar desapercibido es el error más costoso.
-            </p>
-          </div>
-
-          <!-- Enlaces -->
-          <div class="footer-col">
-            <h4 class="col-title">Explorar</h4>
-            <ul class="col-links">
-              <li><a href="index.html">Inicio</a></li>
-              <li><a href="galeria.html">Catálogo Completo</a></li>
-            </ul>
-          </div>
-
-          <!-- Disponibilidad -->
-          <div class="footer-col">
-            <h4 class="col-title">Disponibilidad</h4>
-            <div class="studio-clock">
-              <span>⚡ Cupos activos para nuevos proyectos</span>
-            </div>
-            <div class="social-pills">
-              <a href="https://instagram.com" target="_blank" rel="noopener" class="social-pill">Instagram</a>
-              <a href="https://tiktok.com" target="_blank" rel="noopener" class="social-pill">TikTok</a>
-            </div>
-          </div>
+       PIE DE PÁGINA TOTALMENTE EN NEGRO (#000000)
+  ========================================== -->
+  <footer class="footer-creative">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-col brand-col">
+          <div class="footer-brand">NRIAL PLATFORM<span class="brand-dot">.</span></div>
+          <p class="footer-manifesto">
+            Ayudamos a fundadores, creadores y marcas que entienden que en la era del scroll infinito, pasar desapercibido es el error más costoso.
+          </p>
         </div>
 
-        <!-- Barra de copyright -->
-        <div class="footer-bottom">
-          <div class="copyright">
-            © 2026 <strong>NRIAL Platforms Inc.</strong> Todos los derechos reservados.
+        <div class="footer-col">
+          <h4 class="col-title">Explorar</h4>
+          <ul class="col-links">
+            <li><a href="index.html">Inicio</a></li>
+            <li><a href="galeria.html">Catálogo Completo</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4 class="col-title">Disponibilidad</h4>
+          <div class="studio-clock">
+            <span>⚡ Cupos activos para nuevos proyectos</span>
           </div>
-          <div class="signature">
-            Designs from NRIAL.
+          <div class="social-pills">
+            <a href="https://instagram.com" target="_blank" rel="noopener" class="social-pill">Instagram</a>
+            <a href="https://tiktok.com" target="_blank" rel="noopener" class="social-pill">TikTok</a>
           </div>
         </div>
       </div>
 
-      <!-- IMAGEN NRIAL DEBAJO DEL PIE DE PÁGINA (100% ANCHO) -->
-      <div class="footer-image-strip">
-        <img src="nrial.png" alt="NRIAL" class="nrial-bottom-img" />
+      <div class="footer-bottom">
+        <div class="copyright">
+          © 2026 <strong>NRIAL Platforms Inc.</strong> Todos los derechos reservados.
+        </div>
+        <div class="signature">
+          Designs from NRIAL.
+        </div>
       </div>
-    </footer>
+    </div>
+
+    <div class="footer-image-strip">
+      <img src="nrial.png" alt="NRIAL" class="nrial-bottom-img" />
+    </div>
+  </footer>
 
   <!-- =========================================
-       PLANTILLA DE CARTILLA: EXACTA AL ORIGINAL
+       PLANTILLA REUTILIZABLE (SOPORTA VIDEO E IMAGEN)
   ========================================== -->
   <template id="card-template">
     <article class="ig-card">
-      <!-- HEADER FIJO -->
       <header class="post-header">
         <div class="profile">
           <div class="story-ring">
@@ -217,7 +205,8 @@
         </div>
         <button class="more" type="button" aria-label="Más opciones">•••</button>
       </header>
-      <!-- COMPARADOR (SOLO CAMBIAN LAS RUTAS) -->
+
+      <!-- Comparador 3:4 -->
       <div class="comparison-wrap">
         <div class="comparison" data-comparison>
           <img class="before-media" alt="Antes" draggable="false" loading="lazy" />
@@ -232,7 +221,7 @@
           </div>
         </div>
       </div>
-      <!-- ACCIONES FIJAS -->
+
       <div class="post-actions">
         <div class="left-actions">
           <div class="action-item liked">
@@ -256,13 +245,6 @@
             </svg>
             <span>75</span>
           </div>
-          <div class="action-item">
-            <svg aria-label="Compartir" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>
-            <span>6</span>
-          </div>
         </div>
         <div class="action-item save-action">
           <svg aria-label="Guardar" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -270,20 +252,20 @@
           </svg>
         </div>
       </div>
-      <!-- ENGAGEMENT FIJO -->
+
       <div class="engagement">
         <div class="mini-avatars" aria-hidden="true">
           <span>AB</span><span>LM</span><span>JR</span>
         </div>
         <strong>12,847 Me gusta</strong>
       </div>
-      <!-- DESCRIPCIÓN FIJA -->
+
       <div class="caption">
         <strong>nrial.platforms</strong>
-        <span>Transformación visual real. Del estático al movimiento. 🔥</span>
+        <span>Transformación visual real de alta fidelidad. 🔥</span>
         <div class="hashtags">#Visuales #AntesYDespues #Nrial</div>
       </div>
-      <!-- FOOTER FIJO -->
+
       <footer class="post-footer">
         <button class="comments-link" type="button">Ver los 186 comentarios</button>
         <span class="dot">•</span>
@@ -294,5 +276,4 @@
 
   <script src="script.js"></script>
 </body>
-
 </html>
