@@ -5,16 +5,197 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NRIAL - Dashboard de Medios</title>
   <style>
-    :root { --bg: #0d0e12; --card: #171922; --accent: #ff3040; --text: #f0f0f5; }
-    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); padding: 2rem; max-width: 800px; margin: auto; }
-    .card { background: var(--card); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid #282a36; }
-    label { display: block; margin-top: 1rem; font-weight: 600; font-size: 0.9rem; }
-    input[type="file"], input[type="password"] { width: 100%; margin-top: 0.4rem; padding: 0.7rem; background: #0b0c10; border: 1px solid #333; border-radius: 8px; color: #fff; box-sizing: border-box; }
-    button { margin-top: 1.5rem; background: var(--accent); color: #fff; border: none; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: 700; width: 100%; }
-    .posts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
-    .post-item { background: #0b0c10; border-radius: 8px; padding: 0.75rem; text-align: center; }
-    .post-item img { width: 100%; aspect-ratio: 9/16; object-fit: cover; border-radius: 6px; }
-    .btn-delete { background: #4a151b; color: #ff6b6b; padding: 0.5rem; border: 1px solid #702028; margin-top: 0.5rem; width: 100%; border-radius: 6px; cursor: pointer; }
+    :root {
+      --bg: #0d0e12;
+      --card: #171922;
+      --accent: #ff3040;
+      --gold: #ffc837;
+      --text: #f0f0f5;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2rem;
+      max-width: 860px;
+      margin: auto;
+    }
+
+    .card {
+      background: var(--card);
+      padding: 1.5rem;
+      border-radius: 12px;
+      margin-bottom: 2rem;
+      border: 1px solid #282a36;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input[type="file"],
+    input[type="password"],
+    select {
+      width: 100%;
+      margin-top: 0.4rem;
+      padding: 0.7rem;
+      background: #0b0c10;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #fff;
+      box-sizing: border-box;
+    }
+
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .header-section h2 {
+      margin: 0;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-slots {
+      background: #0b0c10;
+      border: 1px solid #333;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gold);
+    }
+
+    .sort-control select {
+      width: auto;
+      margin-top: 0;
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    button.btn-primary {
+      margin-top: 1.5rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      transition: filter 0.2s;
+    }
+
+    button.btn-primary:hover {
+      filter: brightness(1.1);
+    }
+
+    .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.2rem;
+    }
+
+    .post-item {
+      position: relative;
+      background: #0b0c10;
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+      border: 1px solid #1f222d;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .post-item.is-featured {
+      border: 1px solid var(--gold);
+      box-shadow: 0 0 12px rgba(255, 200, 55, 0.15);
+    }
+
+    .media-thumb-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9/16;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .media-thumb-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Botón de estrella flotante */
+    .btn-star {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(13, 14, 18, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 1.15rem;
+      color: #777;
+      transition: all 0.2s ease;
+    }
+
+    .btn-star:hover {
+      transform: scale(1.1);
+      color: #fff;
+    }
+
+    .btn-star.active {
+      color: var(--gold);
+      border-color: var(--gold);
+      background: rgba(255, 200, 55, 0.18);
+      text-shadow: 0 0 8px rgba(255, 200, 55, 0.6);
+    }
+
+    .post-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.6rem;
+      font-size: 0.75rem;
+      color: #7b7e8d;
+    }
+
+    .btn-delete {
+      background: #4a151b;
+      color: #ff6b6b;
+      padding: 0.45rem;
+      border: 1px solid #702028;
+      margin-top: 0.6rem;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .btn-delete:hover {
+      background: #5e1c23;
+    }
   </style>
 </head>
 <body>
@@ -28,47 +209,153 @@
     <label>Imagen "Antes" (.webp / .jpg / .png):</label>
     <input type="file" id="beforeFile" accept="image/*" />
 
-    <!-- AHORA -->
     <label>Material "Después" (Video o Imagen):</label>
     <input type="file" id="afterFile" accept="video/webm,video/mp4,image/jpeg,image/png,image/webp" />
 
-    <button id="uploadBtn" type="button">Subir a Cloudflare R2</button>
+    <button id="uploadBtn" class="btn-primary" type="button">Subir a Cloudflare R2</button>
   </section>
 
   <section class="card">
-    <h2>Publicaciones en R2</h2>
+    <div class="header-section">
+      <div>
+        <h2>Publicaciones en R2</h2>
+      </div>
+      <div class="status-bar">
+        <div class="badge-slots" id="slotsCounter">Portada: 0 / 6 elegidos</div>
+        <div class="sort-control">
+          <select id="sortOrder">
+            <option value="desc">Más recientes primero</option>
+            <option value="asc">Más antiguos primero</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <div id="postsList" class="posts-grid">Cargando publicaciones...</div>
   </section>
 
   <script>
     const API_URL = "https://nrial-media-api.kevin-123-abanto.workers.dev/api";
+    let currentPosts = [];
+    let featuredIds = [];
 
-    async function loadPosts() {
+    function updateSlotsCounter() {
+      const counterEl = document.getElementById("slotsCounter");
+      counterEl.textContent = `Portada: ${featuredIds.length} / 6 elegidos`;
+      counterEl.style.color = featuredIds.length === 6 ? "#00e696" : "var(--gold)";
+    }
+
+    function renderPosts() {
       const container = document.getElementById("postsList");
-      try {
-        const res = await fetch(`${API_URL}/posts`);
-        const posts = await res.json();
-        if (posts.length === 0) {
-          container.innerHTML = "<p>No hay publicaciones aún en el bucket.</p>";
-          return;
-        }
-        container.innerHTML = posts.map(p => `
-          <div class="post-item">
-            <img src="${p.before}" alt="Antes" />
+      const sortOrder = document.getElementById("sortOrder").value;
+
+      if (!currentPosts || currentPosts.length === 0) {
+        container.innerHTML = "<p>No hay publicaciones aún en el bucket.</p>";
+        return;
+      }
+
+      const sorted = [...currentPosts].sort((a, b) => {
+        return sortOrder === "desc" ? (b.id - a.id) : (a.id - b.id);
+      });
+
+      updateSlotsCounter();
+
+      container.innerHTML = sorted.map(p => {
+        const isFeatured = featuredIds.includes(p.id);
+        return `
+          <div class="post-item ${isFeatured ? 'is-featured' : ''}" id="post-${p.id}">
+            <div class="media-thumb-wrap">
+              <img src="${p.before}" alt="Antes" />
+              <button 
+                type="button" 
+                class="btn-star ${isFeatured ? 'active' : ''}" 
+                onclick="toggleFeatured(${p.id})"
+                title="${isFeatured ? 'Quitar de portada' : 'Mostrar en portada'}">
+                ★
+              </button>
+            </div>
+            <div class="post-info">
+              <span>ID: #${p.id}</span>
+              <span>${isFeatured ? '⭐ En Portada' : 'Solo Galería'}</span>
+            </div>
             <button class="btn-delete" onclick="deletePost(${p.id})">Eliminar</button>
           </div>
-        `).join("");
+        `;
+      }).join("");
+    }
+
+    async function loadData() {
+      const container = document.getElementById("postsList");
+      try {
+        // Carga simultánea de posts y de destacados guardados
+        const [postsRes, featRes] = await Promise.all([
+          fetch(`${API_URL}/posts`),
+          fetch(`${API_URL}/featured`).catch(() => null)
+        ]);
+
+        currentPosts = await postsRes.json();
+        
+        if (featRes && featRes.ok) {
+          featuredIds = await featRes.json();
+        } else {
+          // Si es la primera vez y no hay nada guardado, toma los primeros 6 por defecto
+          featuredIds = currentPosts.slice(0, 6).map(p => p.id);
+        }
+
+        renderPosts();
       } catch (err) {
-        container.innerHTML = "<p>Error al cargar publicaciones.</p>";
+        container.innerHTML = "<p>Error al sincronizar datos.</p>";
       }
     }
+
+    async function toggleFeatured(id) {
+      const secret = document.getElementById("secretKey").value;
+      if (!secret) {
+        return alert("Ingrese su contraseña en el campo de arriba para autorizar la actualización de la portada.");
+      }
+
+      const exists = featuredIds.includes(id);
+
+      if (!exists && featuredIds.length >= 6) {
+        return alert("Ya ha completado los 6 espacios de la portada. Desmarque una estrella antes de añadir otro trabajo.");
+      }
+
+      if (exists) {
+        featuredIds = featuredIds.filter(fId => fId !== id);
+      } else {
+        featuredIds.push(id);
+      }
+
+      renderPosts();
+
+      // Guardar el nuevo arreglo de 6 IDs en Cloudflare
+      try {
+        const res = await fetch(`${API_URL}/featured`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${secret}`
+          },
+          body: JSON.stringify({ featuredIds })
+        });
+
+        if (!res.ok) {
+          throw new Error("No se pudo guardar la configuración.");
+        }
+      } catch (err) {
+        alert("Atención: Hubo un problema al guardar la selección en el servidor.");
+      }
+    }
+
+    document.getElementById("sortOrder").addEventListener("change", renderPosts);
 
     document.getElementById("uploadBtn").addEventListener("click", async () => {
       const secret = document.getElementById("secretKey").value;
       const before = document.getElementById("beforeFile").files[0];
       const after = document.getElementById("afterFile").files[0];
 
-      if (!secret || !before || !after) return alert("Complete la clave y seleccione ambos archivos.");
+      if (!secret || !before || !after) {
+        return alert("Complete la clave y seleccione ambos archivos.");
+      }
 
       const formData = new FormData();
       formData.append("before", before);
@@ -93,7 +380,7 @@
         alert("¡Subida completada con éxito!");
         document.getElementById("beforeFile").value = "";
         document.getElementById("afterFile").value = "";
-        loadPosts();
+        loadData();
       } catch (err) {
         alert("Error: " + err.message);
       } finally {
@@ -111,10 +398,13 @@
         method: "DELETE",
         headers: { "Authorization": `Bearer ${secret}` }
       });
-      loadPosts();
+
+      // Si el archivo eliminado tenía estrella, se saca de destacados liberando el hueco
+      featuredIds = featuredIds.filter(fId => fId !== id);
+      loadData();
     }
 
-    loadPosts();
+    loadData();
   </script>
 </body>
 </html>

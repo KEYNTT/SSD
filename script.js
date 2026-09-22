@@ -129,7 +129,6 @@ function buildCard(media, template) {
   setupComparator(card.querySelector("[data-comparison]"));
   return card;
 }
-
 // 5. Carga de datos (compatible con portada y catálogo)
 document.addEventListener("DOMContentLoaded", async () => {
   const heroComparator = document.querySelector(".comparator-16-9");
@@ -145,39 +144,59 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (!targetGrid || !template) return;
 
   try {
-    const res = await fetch(`${API_POSTS_URL}?t=${Date.now()}`);
-    if (res.ok) {
-      const posts = await res.json();
-      if (!Array.isArray(posts) || posts.length === 0) return;
+    const isGallery = !!fullGrid;
 
-      if (catalogCounter) {
-        catalogCounter.textContent = `${posts.length} publicaciones disponibles en alta fidelidad`;
+    // Se consultan los posts y la lista de IDs con estrella
+    const [resPosts, resFeat] = await Promise.all([
+      fetch(`${API_POSTS_URL}?t=${Date.now()}`),
+      fetch(`${API_POSTS_URL.replace('/posts', '/featured')}?t=${Date.now()}`).catch(() => null)
+    ]);
+
+    if (!resPosts.ok) return;
+    const posts = await resPosts.json();
+    if (!Array.isArray(posts) || posts.length === 0) return;
+
+    let featuredIds = [];
+    if (resFeat && resFeat.ok) {
+      featuredIds = await resFeat.json();
+    }
+
+    if (catalogCounter) {
+      catalogCounter.textContent = `${posts.length} publicaciones disponibles en alta fidelidad`;
+    }
+
+    targetGrid.innerHTML = "";
+
+    let displayPosts = [];
+
+    if (isGallery) {
+      // En galeria.html se muestran todos ordenados por novedad
+      displayPosts = [...posts].sort((a, b) => b.id - a.id);
+    } else {
+      // En index.html se priorizan los que tienen estrella
+      if (featuredIds.length > 0) {
+        displayPosts = featuredIds
+          .map(id => posts.find(p => p.id === id))
+          .filter(Boolean)
+          .slice(0, HOMEPAGE_LIMIT);
+      } else {
+        displayPosts = posts.slice(0, HOMEPAGE_LIMIT);
       }
+    }
 
-      targetGrid.innerHTML = "";
+    displayPosts.forEach((media) => {
+      const cardNode = buildCard(media, template);
+      targetGrid.appendChild(cardNode);
+    });
 
-      // Si es el catálogo carga todo; si es la portada toma hasta HOMEPAGE_LIMIT
-      const isGallery = !!fullGrid;
-      const displayPosts = isGallery ? posts : posts.slice(0, HOMEPAGE_LIMIT);
-
-      displayPosts.forEach((media) => {
-        const cardNode = buildCard(media, template);
-        targetGrid.appendChild(cardNode);
-      });
-
-      if (loadMoreBtn) {
-        if (!isGallery && posts.length > HOMEPAGE_LIMIT) {
-          loadMoreBtn.classList.remove("is-hidden");
-        } else {
-          loadMoreBtn.classList.add("is-hidden");
-        }
+    if (loadMoreBtn) {
+      if (!isGallery && posts.length > HOMEPAGE_LIMIT) {
+        loadMoreBtn.classList.remove("is-hidden");
+      } else {
+        loadMoreBtn.classList.add("is-hidden");
       }
     }
   } catch (err) {
     console.error("Error al cargar publicaciones:", err);
-    if (catalogCounter) {
-      catalogCounter.textContent = "No fue posible sincronizar el catálogo en vivo.";
-    }
   }
 });
-
