@@ -1,8 +1,6 @@
 /**
- * NRIAL PLATFORM — Controlador Unificado
- * Conserva la lógica original exacta con optimización de cuadros por segundo.
+ * NRIAL PLATFORM - Controlador Unificado
  */
-
 const API_POSTS_URL = "https://nrial-media-api.kevin-123-abanto.workers.dev/api/posts";
 const HOMEPAGE_LIMIT = 6;
 
@@ -10,7 +8,7 @@ function isVideoUrl(url) {
   return /\.(webm|mp4|mov|ogg)(\?.*)?$/i.test(url);
 }
 
-// 1. Observador de precarga original
+// 1. Observador de precarga
 const preloadObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting && !video.src && video.dataset.src) {
@@ -21,7 +19,7 @@ const preloadObserver = new IntersectionObserver((entries, observer) => {
   });
 }, { rootMargin: "300px 0px" });
 
-// 2. Observador de reproducción original
+// 2. Observador de reproducción
 const playbackObserver = new IntersectionObserver((entries) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting) {
@@ -34,14 +32,13 @@ const playbackObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.4 });
 
-// 3. Su lógica de comparador original (optimizada sin cambiar eventos)
+// 3. Lógica del comparador
 function setupComparator(container) {
   if (!container) return;
   let resetTimer = null;
   let rafId = null;
   let rect = null;
 
-  // Actualiza la variable CSS sincronizada con el refresco de pantalla
   const updateSplit = (pct) => {
     const clamped = Math.max(0, Math.min(pct, 100));
     if (rafId) cancelAnimationFrame(rafId);
@@ -50,7 +47,6 @@ function setupComparator(container) {
     });
   };
 
-  // Cachea las dimensiones al entrar o presionar para no forzar reflow continuo
   const refreshRect = () => {
     rect = container.getBoundingClientRect();
   };
@@ -58,24 +54,21 @@ function setupComparator(container) {
   const onMove = (e) => {
     container.classList.remove("is-resetting");
     clearTimeout(resetTimer);
-
     if (!rect) refreshRect();
-
-    if (rect.width > 0) {
+    if (rect && rect.width > 0) {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       updateSplit(((clientX - rect.left) / rect.width) * 100);
     }
   };
 
   const onReset = () => {
-    rect = null; // Libera el caché para recalcular en la próxima interacción
+    rect = null;
     container.classList.add("is-resetting");
     updateSplit(50);
     clearTimeout(resetTimer);
     resetTimer = setTimeout(() => container.classList.remove("is-resetting"), 450);
   };
 
-  // Mismos escuchadores exactos de su código original
   container.addEventListener("pointerdown", (e) => {
     refreshRect();
     onMove(e);
@@ -85,7 +78,6 @@ function setupComparator(container) {
     onMove(e);
   });
   container.addEventListener("pointermove", onMove);
-
   ["pointerleave", "pointerup", "pointercancel"].forEach((evt) => {
     container.addEventListener(evt, onReset);
   });
@@ -93,11 +85,10 @@ function setupComparator(container) {
   updateSplit(50);
 }
 
-// 4. Construcción de la tarjeta original
+// 4. Construcción de tarjetas de la galería
 function buildCard(media, template) {
   const clone = template.content.cloneNode(true);
   const card = clone.querySelector(".ig-card");
-
   const beforeImg = clone.querySelector(".before-media");
   if (beforeImg) beforeImg.src = media.before;
 
@@ -111,7 +102,6 @@ function buildCard(media, template) {
     videoEl.setAttribute("muted", "");
     videoEl.setAttribute("playsinline", "");
     videoEl.dataset.src = media.after;
-
     preloadObserver.observe(videoEl);
     playbackObserver.observe(videoEl);
   } else {
@@ -129,7 +119,8 @@ function buildCard(media, template) {
   setupComparator(card.querySelector("[data-comparison]"));
   return card;
 }
-// 5. Carga de datos (compatible con portada y catálogo)
+
+// 5. Carga de datos
 document.addEventListener("DOMContentLoaded", async () => {
   const heroComparator = document.querySelector(".comparator-16-9");
   if (heroComparator) setupComparator(heroComparator);
@@ -145,8 +136,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   try {
     const isGallery = !!fullGrid;
-
-    // Se consultan los posts y la lista de IDs con estrella
     const [resPosts, resFeat] = await Promise.all([
       fetch(`${API_POSTS_URL}?t=${Date.now()}`),
       fetch(`${API_POSTS_URL.replace('/posts', '/featured')}?t=${Date.now()}`).catch(() => null)
@@ -166,14 +155,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     targetGrid.innerHTML = "";
-
     let displayPosts = [];
 
     if (isGallery) {
-      // En galeria.html se muestran todos ordenados por novedad
       displayPosts = [...posts].sort((a, b) => b.id - a.id);
     } else {
-      // En index.html se priorizan los que tienen estrella
       if (featuredIds.length > 0) {
         displayPosts = featuredIds
           .map(id => posts.find(p => p.id === id))
