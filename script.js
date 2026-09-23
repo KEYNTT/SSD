@@ -8,7 +8,7 @@ function isVideoUrl(url) {
   return /\.(webm|mp4|mov|ogg)(\?.*)?$/i.test(url);
 }
 
-// 1. Observador de precarga para las tarjetas
+// 1. Observador de precarga para las tarjetas de la galería
 const preloadObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting && !video.src && video.dataset.src) {
@@ -19,7 +19,7 @@ const preloadObserver = new IntersectionObserver((entries, observer) => {
   });
 }, { rootMargin: "300px 0px" });
 
-// 2. Observador de reproducción para las tarjetas
+// 2. Observador de reproducción para las tarjetas de la galería
 const playbackObserver = new IntersectionObserver((entries) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting) {
@@ -32,7 +32,7 @@ const playbackObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.4 });
 
-// 3. Lógica del comparador (mantenido para las tarjetas del catálogo)
+// 3. Lógica del comparador interactivo (mantenido para las tarjetas del catálogo)
 function setupComparator(container) {
   if (!container) return;
   let resetTimer = null;
@@ -85,15 +85,12 @@ function setupComparator(container) {
   updateSplit(50);
 }
 
-/* ======================================================
-   CONTROLADOR DEL VIDEO PRINCIPAL (HERO MINIMALISTA)
-====================================================== */
+// 4. Controlador del Video Principal (Hero Minimalista)
 function setupHeroVideo() {
   const container = document.getElementById("videoWrapper");
   const video = document.getElementById("heroMainVideo");
   if (!container || !video) return;
 
-  const btnCenterPlay = document.getElementById("btnCenterPlay");
   const iconPlay = document.getElementById("iconCenterPlay");
   const iconPause = document.getElementById("iconCenterPause");
   const volumeControl = document.getElementById("volumeControl");
@@ -101,7 +98,7 @@ function setupHeroVideo() {
   const btnMuteToggle = document.getElementById("btnMuteToggle");
   const volWaves = document.getElementById("volWaves");
 
-  // Función para actualizar estados visuales
+  // Actualización de estado visual (clases para CSS)
   const setPlayingUI = (playing) => {
     if (playing) {
       container.classList.remove("is-paused");
@@ -116,41 +113,51 @@ function setupHeroVideo() {
     }
   };
 
-  // 1. Iniciar reproducción tras 2 segundos con volumen al 100%
+  // 1. Inicio a 1 segundo (1000 ms) respetando las restricciones del móvil
   setTimeout(() => {
     video.volume = 1.0;
     video.muted = false;
-    if (volumeSlider) volumeSlider.value = 1.0;
-
     const playPromise = video.play();
+
     if (playPromise !== undefined) {
       playPromise
         .then(() => {
           setPlayingUI(true);
+          if (volumeSlider) volumeSlider.value = 1.0;
         })
         .catch(() => {
-          // Si el navegador bloquea audio sin interacción previa, inicia muteado
-          // y activa el volumen al máximo al primer clic del usuario
+          // En móviles el navegador bloquea el audio automático sin interacción.
+          // Arranca silenciado para garantizar que no se congele:
           video.muted = true;
-          video.play().then(() => setPlayingUI(true));
-          
-          const enableAudioOnGesture = () => {
-            video.muted = false;
-            video.volume = 1.0;
-            if (volumeSlider) volumeSlider.value = 1.0;
-            if (volWaves) volWaves.style.display = "block";
-          };
-          window.addEventListener("click", enableAudioOnGesture, { once: true });
-          window.addEventListener("touchstart", enableAudioOnGesture, { once: true });
+          video.play().then(() => setPlayingUI(true)).catch(() => {});
         });
     }
   }, 1000);
 
-  // 2. Conmutar Play / Pausa al presionar el botón o el área del video
+  // 2. Detección de Scroll vs Clic táctil
+  let isTouchScrolling = false;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  container.addEventListener("touchstart", (e) => {
+    isTouchScrolling = false;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  container.addEventListener("touchmove", (e) => {
+    const diffX = Math.abs(e.touches[0].clientX - touchStartX);
+    const diffY = Math.abs(e.touches[0].clientY - touchStartY);
+    // Si el dedo se movió más de 8 píxeles, es un desplazamiento de pantalla
+    if (diffX > 8 || diffY > 8) {
+      isTouchScrolling = true;
+    }
+  }, { passive: true });
+
+  // 3. Alternar Play / Pausa
   const togglePlay = () => {
     if (video.paused) {
-      video.play();
-      setPlayingUI(true);
+      video.play().then(() => setPlayingUI(true)).catch(() => {});
     } else {
       video.pause();
       setPlayingUI(false);
@@ -158,12 +165,29 @@ function setupHeroVideo() {
   };
 
   container.addEventListener("click", (e) => {
-    // Evita pausar/reproducir si se está manipulando la barra de volumen
+    // Si el usuario estaba deslizando la pantalla, se ignora el evento
+    if (isTouchScrolling) {
+      isTouchScrolling = false;
+      return;
+    }
+
+    // Evitar pausar si interactúa con los controles de volumen
     if (volumeControl && volumeControl.contains(e.target)) return;
+
+    // Si el móvil lo arrancó en silencio, el primer toque desbloquea el sonido al 100%
+    if (video.muted) {
+      video.muted = false;
+      video.volume = 1.0;
+      if (volumeSlider) volumeSlider.value = 1.0;
+      if (volWaves) volWaves.style.display = "block";
+      // Si ya estaba en reproducción, solo desmutea sin pausar
+      if (!video.paused) return;
+    }
+
     togglePlay();
   });
 
-  // 3. Control de volumen minimalista
+  // 4. Control de volumen
   const applyVolume = (val) => {
     const clamped = Math.max(0, Math.min(val, 1));
     video.volume = clamped;
@@ -189,6 +213,7 @@ function setupHeroVideo() {
     });
   }
 }
+
 // 5. Construcción de tarjetas de la galería
 function buildCard(media, template) {
   const clone = template.content.cloneNode(true);
@@ -224,9 +249,9 @@ function buildCard(media, template) {
   return card;
 }
 
-// 6. Carga de datos y arranque global
+// 6. Inicialización global
 document.addEventListener("DOMContentLoaded", async () => {
-  // Inicializar reproductor de video de la cabecera
+  // Inicializar reproductor de video
   setupHeroVideo();
 
   const fullGrid = document.getElementById("full-grid");
