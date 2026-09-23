@@ -123,7 +123,7 @@ body {
 }
 
 /* ======================================================
-   1. HERO CINE REDISEÑADO (STUDIO MONITOR)
+   1. HERO CINE (SECCIÓN SUPERIOR)
 ====================================================== */
 .hero-wrapper {
   max-width: 1360px;
@@ -268,7 +268,7 @@ body {
   background: rgba(0, 0, 0, 0.1);
 }
 
-/* Lado derecho: Monitor de estudio */
+/* Lado derecho: Contenedor y Brillo Ambiental */
 .hero-right {
   position: relative;
   width: 100%;
@@ -276,161 +276,166 @@ body {
 
 .hero-ambient-glow {
   position: absolute;
-  inset: -15px;
-  background: radial-gradient(circle at 45% 45%, rgba(255, 48, 64, 0.22), rgba(160, 32, 240, 0.18), transparent 70%);
-  filter: blur(34px);
+  inset: -20px;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 48, 64, 0.22), rgba(160, 32, 240, 0.18), transparent 70%);
+  filter: blur(40px);
   z-index: 1;
   pointer-events: none;
 }
-
-.studio-monitor-frame {
-  position: relative;
-  z-index: 2;
-  background: rgba(18, 20, 28, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 16px;
-  box-shadow: 0 30px 70px -15px rgba(10, 12, 20, 0.45);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-}
-
-.comparator-outer {
-  position: relative;
-  width: 100%;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.badge-cinema {
-  position: absolute;
-  z-index: 10;
-  top: 12px;
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  padding: 4px 9px;
-  border-radius: 6px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  pointer-events: none;
-}
-
-.badge-top-left {
-  left: 12px;
-  background: rgba(14, 16, 22, 0.75);
-  color: #c0c4d6;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.badge-top-right {
-  right: 12px;
-  background: linear-gradient(135deg, rgba(255, 48, 64, 0.9), rgba(160, 32, 240, 0.9));
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(255, 48, 64, 0.35);
-}
-
-.comparator-16-9 {
-  --split: 50%;
+/* ======================================================
+   REPRODUCTOR MINIMALISTA TRANSLÚCIDO
+====================================================== */
+.video-glass-container {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
-  background: #08090d;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(10, 11, 16, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 60px -15px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
   user-select: none;
-  touch-action: pan-y;
-  cursor: ew-resize;
+  z-index: 2;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.media-layer {
-  position: absolute;
-  inset: 0;
+.hero-video-player {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  pointer-events: none;
+  display: block;
+  pointer-events: none; /* Permite que el click active el contenedor */
 }
 
-.media-clip {
+/* Botón Central Flotante */
+.center-play-btn {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 2;
-  overflow: hidden;
-  clip-path: inset(0 0 0 var(--split, 50%));
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(18, 20, 28, 0.45);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              background 0.2s ease;
+  z-index: 5;
+}
+
+.center-play-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* Se oculta por completo cuando el video está reproduciéndose */
+.video-glass-container.is-playing .center-play-btn {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.85);
   pointer-events: none;
 }
 
-.monitor-footer {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 12px;
-  align-items: center;
-  margin-top: 14px;
-  padding: 10px 14px;
-  background: rgba(8, 9, 13, 0.6);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.footer-split {
+/* Cápsula de Volumen Minimalista (desvanecida por defecto) */
+.minimal-volume-glass {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  padding: 6px 14px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  border-radius: 9999px;
+  background: rgba(15, 17, 24, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 6;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+              transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.split-meta {
-  display: flex;
-  flex-direction: column;
+/* Solo se hace visible cuando el video está pausado */
+.video-glass-container.is-paused .minimal-volume-glass {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
-.split-title {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #e4e7f2;
-}
-
-.split-desc {
-  font-size: 9.5px;
-  color: #72768a;
-  margin-top: 1px;
-}
-
-.split-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.dot-red {
-  background: #ff4a5a;
-  box-shadow: 0 0 8px rgba(255, 74, 90, 0.4);
-}
-
-.dot-green {
-  background: #00e696;
-  box-shadow: 0 0 8px rgba(0, 230, 150, 0.4);
-}
-
-.footer-split-divider {
-  width: 1px;
+.vol-icon-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  width: 24px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.slider-hint {
-  text-align: center;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: #65697d;
-  margin-top: 10px;
+.vol-icon-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Slider de volumen fino y discreto */
+.mini-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 65px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+}
+
+.mini-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.mini-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.mini-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: none;
+  cursor: pointer;
 }
 
 /* ======================================================
-   SLIDER (LÍNEA Y MANIJA)
+   SLIDER (LÍNEA Y MANIJA PARA TARJETAS DEL CATÁLOGO)
 ====================================================== */
 .slider-line {
   position: absolute;
@@ -832,6 +837,7 @@ body {
 .dot {
   color: #aaa;
 }
+
 /* ======================================================
    3. SECCIÓN: PROCESO + BANNER (EFECTO METÁLICO CROMÁTICO)
 ====================================================== */
@@ -853,7 +859,6 @@ body {
    TARJETA 1: ASÍ ES MI PROCESO (TITANIO HOLOGRÁFICO NEÓN)
 ------------------------------------------------------ */
 .card-process-flow {
-  /* Efecto metálico multi-parada de esquina a esquina */
   background: linear-gradient(
     135deg,
     #ebd5ff 0%,
@@ -981,7 +986,6 @@ body {
    TARJETA 2: BANNER DE LANZAMIENTO (SUNSET CHROME)
 ------------------------------------------------------ */
 .card-launch-cta {
-  /* Degradado metálico cálido de alto contraste */
   background: linear-gradient(
     135deg,
     #ffd1bb 0%,
@@ -1138,7 +1142,6 @@ body {
 }
 
 .card-diy {
-  /* Degradado metálico cian y aguamarina iridiscente */
   background: linear-gradient(
     135deg,
     #bee9f7 0%,
@@ -1571,17 +1574,20 @@ body {
     gap: 14px;
   }
 
-  .monitor-footer {
-    grid-template-columns: 1fr;
+  .hero-ambient-glow {
+    display: none;
+  }
+
+  /* Ajuste de controles flotantes en pantalla táctil */
+  .video-controls-glass {
+    bottom: 12px;
+    width: calc(100% - 20px);
+    padding: 6px 12px;
     gap: 8px;
   }
 
-  .footer-split-divider {
-    display: none;
-  }
-
-  .hero-ambient-glow {
-    display: none;
+  .glass-volume-slider {
+    width: 55px;
   }
 
   .gallery-section {

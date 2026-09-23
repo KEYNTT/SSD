@@ -8,7 +8,7 @@ function isVideoUrl(url) {
   return /\.(webm|mp4|mov|ogg)(\?.*)?$/i.test(url);
 }
 
-// 1. Observador de precarga
+// 1. Observador de precarga para las tarjetas
 const preloadObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting && !video.src && video.dataset.src) {
@@ -19,7 +19,7 @@ const preloadObserver = new IntersectionObserver((entries, observer) => {
   });
 }, { rootMargin: "300px 0px" });
 
-// 2. Observador de reproducción
+// 2. Observador de reproducción para las tarjetas
 const playbackObserver = new IntersectionObserver((entries) => {
   entries.forEach(({ target: video, isIntersecting }) => {
     if (isIntersecting) {
@@ -32,7 +32,7 @@ const playbackObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.4 });
 
-// 3. Lógica del comparador
+// 3. Lógica del comparador (mantenido para las tarjetas del catálogo)
 function setupComparator(container) {
   if (!container) return;
   let resetTimer = null;
@@ -85,7 +85,111 @@ function setupComparator(container) {
   updateSplit(50);
 }
 
-// 4. Construcción de tarjetas de la galería
+/* ======================================================
+   CONTROLADOR DEL VIDEO PRINCIPAL (HERO MINIMALISTA)
+====================================================== */
+function setupHeroVideo() {
+  const container = document.getElementById("videoWrapper");
+  const video = document.getElementById("heroMainVideo");
+  if (!container || !video) return;
+
+  const btnCenterPlay = document.getElementById("btnCenterPlay");
+  const iconPlay = document.getElementById("iconCenterPlay");
+  const iconPause = document.getElementById("iconCenterPause");
+  const volumeControl = document.getElementById("volumeControl");
+  const volumeSlider = document.getElementById("volumeSlider");
+  const btnMuteToggle = document.getElementById("btnMuteToggle");
+  const volWaves = document.getElementById("volWaves");
+
+  // Función para actualizar estados visuales
+  const setPlayingUI = (playing) => {
+    if (playing) {
+      container.classList.remove("is-paused");
+      container.classList.add("is-playing");
+      if (iconPlay) iconPlay.style.display = "none";
+      if (iconPause) iconPause.style.display = "block";
+    } else {
+      container.classList.remove("is-playing");
+      container.classList.add("is-paused");
+      if (iconPlay) iconPlay.style.display = "block";
+      if (iconPause) iconPause.style.display = "none";
+    }
+  };
+
+  // 1. Iniciar reproducción tras 2 segundos con volumen al 100%
+  setTimeout(() => {
+    video.volume = 1.0;
+    video.muted = false;
+    if (volumeSlider) volumeSlider.value = 1.0;
+
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setPlayingUI(true);
+        })
+        .catch(() => {
+          // Si el navegador bloquea audio sin interacción previa, inicia muteado
+          // y activa el volumen al máximo al primer clic del usuario
+          video.muted = true;
+          video.play().then(() => setPlayingUI(true));
+          
+          const enableAudioOnGesture = () => {
+            video.muted = false;
+            video.volume = 1.0;
+            if (volumeSlider) volumeSlider.value = 1.0;
+            if (volWaves) volWaves.style.display = "block";
+          };
+          window.addEventListener("click", enableAudioOnGesture, { once: true });
+          window.addEventListener("touchstart", enableAudioOnGesture, { once: true });
+        });
+    }
+  }, 1000);
+
+  // 2. Conmutar Play / Pausa al presionar el botón o el área del video
+  const togglePlay = () => {
+    if (video.paused) {
+      video.play();
+      setPlayingUI(true);
+    } else {
+      video.pause();
+      setPlayingUI(false);
+    }
+  };
+
+  container.addEventListener("click", (e) => {
+    // Evita pausar/reproducir si se está manipulando la barra de volumen
+    if (volumeControl && volumeControl.contains(e.target)) return;
+    togglePlay();
+  });
+
+  // 3. Control de volumen minimalista
+  const applyVolume = (val) => {
+    const clamped = Math.max(0, Math.min(val, 1));
+    video.volume = clamped;
+    video.muted = clamped === 0;
+    if (volWaves) volWaves.style.display = clamped === 0 ? "none" : "block";
+    if (volumeSlider) volumeSlider.value = clamped;
+  };
+
+  if (volumeSlider) {
+    volumeSlider.addEventListener("input", (e) => {
+      applyVolume(parseFloat(e.target.value));
+    });
+  }
+
+  if (btnMuteToggle) {
+    btnMuteToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (video.muted || video.volume === 0) {
+        applyVolume(1.0);
+      } else {
+        applyVolume(0);
+      }
+    });
+  }
+}
+// 5. Construcción de tarjetas de la galería
 function buildCard(media, template) {
   const clone = template.content.cloneNode(true);
   const card = clone.querySelector(".ig-card");
@@ -120,10 +224,10 @@ function buildCard(media, template) {
   return card;
 }
 
-// 5. Carga de datos
+// 6. Carga de datos y arranque global
 document.addEventListener("DOMContentLoaded", async () => {
-  const heroComparator = document.querySelector(".comparator-16-9");
-  if (heroComparator) setupComparator(heroComparator);
+  // Inicializar reproductor de video de la cabecera
+  setupHeroVideo();
 
   const fullGrid = document.getElementById("full-grid");
   const cardsGrid = document.getElementById("cards-grid");
